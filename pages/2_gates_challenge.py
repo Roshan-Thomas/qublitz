@@ -17,9 +17,55 @@ def add_square(pulse_vector, amplitude, start, stop, n_steps, t_final):
         pulse_vector = np.pad(pulse_vector, (0, len(square_pulse) - len(pulse_vector)), 'constant')
     return np.clip(pulse_vector + square_pulse, -1, 1)
 
+# _________________________________ (Misc Functions) ___________________________________
+
+def menu_buttons():
+    import streamlit as st
+
+    with st.container():
+        col1, col2, col3, col4 = st.columns(4)
+
+        with col1:
+            st.button("TUTORIAL", type="secondary", use_container_width=True)
+        with col2:
+            st.button("GATE CHALLENGE", type="secondary", use_container_width=True)
+        with col3:
+            st.button("PULSE CHALLENGE", type="secondary", use_container_width=True)
+        with col4:
+            st.button("LEVELS", type="secondary", use_container_width=True)
+
+def gates_buttons():
+    import streamlit as st
+    
+    with st.container():
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+            st.button("X-Gate", type="secondary", use_container_width=True)
+        with col2:
+            st.button("Y-Gate", type="secondary", use_container_width=True)
+        with col3:
+            st.button("UNDO", type="secondary", use_container_width=True)
+
+
+
+# _________________________________ (Key Functions) ____________________________________
+
+
+
+
+
+
+
+
+
+# ________________________________ (Main) _____________________________________________
+
 def main():
     
-    st.title("Qubit Gates Challenge")
+    st.title("Challenge Mode")
+
+    menu_buttons()
 
     # These are default parameters that do not need to be changed for challenge mode
     omega_q = 5.000 # Default qubit frequency is 5.000 GHz
@@ -90,6 +136,12 @@ def main():
     
      # Display the plot
     st.plotly_chart(fig_bloch)
+
+    # ___________________________________________________________
+    
+    gates_buttons()
+
+    # ____________________________________________________________
 
     # Rough Draft of X-Gate Button
     if st.button("X-Gate"):
