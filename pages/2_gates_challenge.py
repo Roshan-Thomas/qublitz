@@ -1,4 +1,5 @@
 import streamlit as st 
+from streamlit_multipage import MultiPage
 import numpy as np 
 import qutip as qt
 import plotly.graph_objects as go
@@ -19,12 +20,29 @@ def add_square(pulse_vector, amplitude, start, stop, n_steps, t_final):
 
 # _________________________________ (Misc Functions) ___________________________________
 
+def default_params():
+    # These are default parameters that do not need to be changed for challenge mode
+    omega_q = 5.000 # Default qubit frequency is 5.000 GHz
+    omega_d = 5.000 # Default drive frequency is 5.000 
+    omega_rabi = 50.000 # Default Rabi frequency is 50.000 MHz
+    t_final = 200 # Default total time for each simulation is 200 ns
+    T1 = 100000000000 # Default relaxation time constant
+    T2 = 200000000000 # Default dephasing time constant from 0 to 1000.0 ns
+    detuning = 0
+    n_steps = 20*int(t_final) # set the number of steps based on user inputs times 20
+    num_shots = 256 # set the number of shots to 256
+    # Create a list of time values from 0 to t_final
+    time_values = np.linspace(0, t_final, n_steps)
+
+    return omega_q, omega_d, omega_rabi, t_final, T1, T2, detuning, n_steps, num_shots, time_values
+
 def menu_buttons():
     import streamlit as st
 
     with st.container():
         col1, col2, col3, col4 = st.columns(4)
 
+        # TODO: Add on-click functionalities for these buttons
         with col1:
             st.button("TUTORIAL", type="secondary", use_container_width=True)
         with col2:
@@ -47,41 +65,52 @@ def gates_buttons():
         with col3:
             st.button("UNDO", type="secondary", use_container_width=True)
 
-
+def click_button():
+    st.session_state.clicked = True
 
 # _________________________________ (Key Functions) ____________________________________
 
+def tutorial_page_1(time_values, t_final):
+    import streamlit as st
 
-
-
-
-
-
-
-
-# ________________________________ (Main) _____________________________________________
-
-def main():
+    with st.container():
+        page_text = 'It is commonly known that most computers are told what to do through “binary.” Transistors in classical computation process a string of 1’s and 0’s. to perform computations. :red[Quantum Computation] uses qubits instead of transistors to read 1’s and 0’s. To do a bit flip, we have to use “:red[gates]” to change the state.'
+        st.markdown(page_text, unsafe_allow_html=False) # TODO: Add colour to background of container
+        
+        _, _, _, col4 = st.columns(4)
+        with col4:
+            st.button("NEXT", type="secondary", use_container_width=True, on_click=click_button)
+        
+        bloch_sphere(time_values, t_final)
     
-    st.title("Challenge Mode")
 
-    menu_buttons()
 
-    # These are default parameters that do not need to be changed for challenge mode
-    omega_q = 5.000 # Default qubit frequency is 5.000 GHz
-    omega_d = 5.000 # Default drive frequency is 5.000 
-    omega_rabi = 50.000 # Default Rabi frequency is 50.000 MHz
-    t_final = 200 # Default total time for each simulation is 200 ns
-    T1 = 100000000000 # Default relaxation time constant
-    T2 = 200000000000 # Default dephasing time constant from 0 to 1000.0 ns
-    detuning = 0
-    n_steps = 20*int(t_final) # set the number of steps based on user inputs times 20
-    num_shots = 256 # set the number of shots to 256
-    # Create a list of time values from 0 to t_final
-    time_values = np.linspace(0, t_final, n_steps)
+def tutorial_page_2(placeholder):
+    import streamlit as st
 
-    # Below is starter code for the Unitary Hack issue
+    with st.container():
+        page_text = 'Let’s perform a bit flip! Navigate from 0 to 1 using an X-Gate'
+        st.text_area(label="text", value=page_text, label_visibility="hidden", height=20)
 
+def tutorial_page_3():
+    import streamlit as st
+
+    with st.container():
+        page_text = 'Great Job! An X-Gate flips the state from 0 to 1 by rotating about the x-axis.'
+        st.text_area(label="text", value=page_text, label_visibility="hidden", height=20) # TODO: Add colour to background of container
+
+        _, _, _, col4 = st.columns(4)
+        with col4:
+            st.button("NEXT", type="secondary", use_container_width=True)
+
+def tutorial_page_4():
+    import streamlit as st
+
+    with st.container():
+        page_text = 'Try navigating from 1 back to 0.'
+        st.text_area(label="text", value=page_text, label_visibility="hidden", height=20)
+
+def bloch_sphere(time_values, t_final):
     # Bloch Sphere - Creating a meshgrid for the Bloch Sphere 
     u, v = np.mgrid[0:2*np.pi:20j, 0:np.pi:10j]
     x_sphere = np.cos(u) * np.sin(v)
@@ -137,12 +166,7 @@ def main():
      # Display the plot
     st.plotly_chart(fig_bloch)
 
-    # ___________________________________________________________
-    
-    gates_buttons()
-
-    # ____________________________________________________________
-
+def x_gate(omega_rabi, omega_q, omega_d, num_shots, T1, T2):
     # Rough Draft of X-Gate Button
     if st.button("X-Gate"):
         st.session_state.sigma_x_vec = np.zeros(n_steps)
@@ -230,6 +254,7 @@ def main():
         # Display the plot
         st.plotly_chart(fig_bloch)
 
+def y_gate(omega_rabi, omega_q, omega_d, num_shots, T1, T2):
     # Rough Draft of Y-Gate Button
     if st.button("Y-Gate"):
         st.session_state.sigma_x_vec = np.zeros(n_steps)
@@ -321,6 +346,49 @@ def main():
         ))
         # Display the plot
         st.plotly_chart(fig_bloch)
+
+
+# _________________________________ (Pages) ____________________________________________
+
+def tutorial_page(time_values, t_final):
+    import streamlit as st
+
+    st.subheader("LEVEL 1: PAULI GATES - TUTORIAL")
+
+    placeholder = st.empty()
+    if 'clicked' not in st.session_state:
+        st.session_state.clicked = False
+
+    with placeholder.container():
+        tutorial_page_1(time_values, t_final)
+        
+    if st.session_state.clicked:
+        placeholder.empty()
+        st.session_state.clicked = False
+        st.write("Page 2")
+    
+    
+
+
+
+# ________________________________ (Main) _____________________________________________
+
+def main():
+    
+    st.title("Challenge Mode")
+
+    menu_buttons()
+
+    omega_q, omega_d, omega_rabi, t_final, T1, T2, detuning, n_steps, num_shots, time_values = default_params() # default parameters
+
+    tutorial_page(time_values, t_final) # TODO: At the end order these input params properly
+    # ___________________________________________________________
+    
+    # gates_buttons()
+
+    # ____________________________________________________________
+
+    
 
 if __name__ == "__main__":
     main()
